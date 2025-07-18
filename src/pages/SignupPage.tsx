@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signupApi } from "../api/auth";
 import "./AuthPage.css";
+import Logo from "../components/Logo";
+
 
 function SignupPage() {
   const navigate = useNavigate();
@@ -23,6 +25,7 @@ function SignupPage() {
   return (
     <div className="auth-container">
       <div className="auth-box">
+        <Logo />
         <h2 className="auth-title">회원가입</h2>
         <input
           type="email"
