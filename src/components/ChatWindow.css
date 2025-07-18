@@ -1,0 +1,38 @@
+.chat-window {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+  
+  .message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .initial-message {
+    text-align: center;
+    color: #888;
+    margin-top: 2rem;
+  }
+  
+  .message-bubble {
+    max-width: 80%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  
+  .message-bubble.user {
+    align-self: flex-end;
+    background-color: #e0f0ff;
+    color: #000;
+  }
+  
+  .message-bubble.assistant {
+    align-self: flex-start;
+    background-color: #f0f0f0;
+    color: #000;
+  }
+  
