@@ -42,7 +42,7 @@ function Sidebar({ setConversationId }: Props) {
 
       {/* ✅ 새 채팅 버튼 */}
       <button className="new-chat-button" onClick={handleNewChat}>
-        <Plus size={16} style={{ marginRight: "6px" }} />
+        <Plus size={16} style={{ marginRight: "6px", verticalAlign: "middle" }} />
         새 채팅
       </button>
 
@@ -56,14 +56,14 @@ function Sidebar({ setConversationId }: Props) {
               {conv.title}
             </div>
             <button className="delete-button" onClick={() => handleDelete(conv.conversation_id)}>
-              <Trash2 size={16} />
+              <Trash2 size={16} style={{verticalAlign: "middle"}}/>
             </button>
           </div>
         ))}
       </div>
 
       <button className="logout-button" onClick={handleLogout}>
-        <LogOut size={13} style={{ marginRight: "8px" }} />
+        <LogOut size={13} style={{ marginRight: "8px", verticalAlign: "middle" }} />
         로그아웃
       </button>
     </div>

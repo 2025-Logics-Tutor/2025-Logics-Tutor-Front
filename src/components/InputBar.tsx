@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./InputBar.css";
 import { useConversationContext } from "../context/ConversationContext";
+import { Send, ArrowUpRight } from "lucide-react";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -101,7 +102,7 @@ function InputBar({ conversationId, setConversationId, messages, setMessages }: 
         onChange={(e) => setInput(e.target.value)}
       />
       <button className="send-button" onClick={handleSend}>
-        ✉️
+        <Send size={18} style={{verticalAlign: "middle" }} />
       </button>
     </div>
   );
