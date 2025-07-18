@@ -37,3 +37,28 @@ export async function signupApi(
     return res.json(); // { message: "회원가입 성공" }
   }
   
+  // src/api/auth.ts
+
+export async function refreshAccessToken() {
+    const refreshToken = localStorage.getItem("refresh_token");
+  
+    if (!refreshToken) {
+      throw new Error("리프레시 토큰 없음");
+    }
+  
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+      },
+    });
+  
+    if (!res.ok) {
+      throw new Error("액세스 토큰 갱신 실패");
+    }
+  
+    const data = await res.json(); // { access_token: "..." }
+    localStorage.setItem("access_token", data.access_token);
+    return data.access_token;
+  }
+  

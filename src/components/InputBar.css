@@ -3,6 +3,7 @@
     padding: 1rem;
     border-top: 1px solid #ddd;
     background: #fff;
+    /* 기본적으로 하단에 고정됨 (chat-main이 flex column이기 때문) */
   }
   
   .input-box {

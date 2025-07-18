@@ -14,9 +14,14 @@ function ChatWindow({ messages }: Props) {
           <div className="initial-message">오늘은 무엇을 공부할까요?</div>
         ) : (
           messages.map((msg) => (
-            <div key={msg.message_id || Math.random()} className={`message-bubble ${msg.role}`}>
-              {msg.content}
+            <div
+                key={msg.message_id || Math.random()}
+                className={`message-bubble ${msg.role}`}
+                style={{ whiteSpace: "pre-wrap" }}
+            >
+            {msg.content}
             </div>
+
           ))
         )}
       </div>

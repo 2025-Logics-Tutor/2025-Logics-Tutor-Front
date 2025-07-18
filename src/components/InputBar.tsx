@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./InputBar.css";
+import { useConversationContext } from "../context/ConversationContext";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -15,6 +16,7 @@ interface Props {
 
 function InputBar({ conversationId, setConversationId, messages, setMessages }: Props) {
   const [input, setInput] = useState("");
+  const { fetchConversations } = useConversationContext();
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -44,56 +46,47 @@ function InputBar({ conversationId, setConversationId, messages, setMessages }: 
         return;
       }
 
+      if (!conversationId) {
+        const newId = response.headers.get("X-Conversation-Id");
+        if (newId) {
+          setConversationId(Number(newId));
+        }
+      }
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
 
-      let isFirstChunk = true;
       let fullContent = "";
+      let isFirstChunk = true;
+      let assistantFirstMessageSent = false;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
+        fullContent += chunk;
 
-        for (const line of lines) {
-            if (!line.startsWith("data:")) continue;
-          
-            // ✅ 원본 그대로 출력 (이스케이프 없이)
-            console.log("📥 수신한 chunk 원본:", line);
-          
-            const raw = line.slice(6); // "data: " (6글자) 제거
-            if (!raw) continue;
-          
-            // ✅ conversationId JSON 여부 체크
-            try {
-              const parsed = JSON.parse(raw);
-              if (parsed.conversationId) {
-                setConversationId(parsed.conversationId);
-                continue;
-              }
-            } catch {
-              // JSON 아님 → 텍스트로 처리
-            }
-          
-            fullContent += raw;
-          
-            if (isFirstChunk) {
-              setMessages((prev) => [...prev, { role: "assistant", content: fullContent }]);
-              isFirstChunk = false;
-            } else {
-              setMessages((prev) => {
-                const updated = [...prev];
-                updated[updated.length - 1] = {
-                  ...updated[updated.length - 1],
-                  content: fullContent,
-                };
-                return updated;
-              });
-            }
+        if (isFirstChunk) {
+          setMessages((prev) => [...prev, { role: "assistant", content: fullContent }]);
+          isFirstChunk = false;
+
+          if (!assistantFirstMessageSent) {
+            assistantFirstMessageSent = true;
+            // ✅ assistant 응답 시작 시점에 fetchConversations() 호출
+            fetchConversations();
           }
-      }          
+        } else {
+          setMessages((prev) => {
+            const updated = [...prev];
+            updated[updated.length - 1] = {
+              ...updated[updated.length - 1],
+              content: fullContent,
+            };
+            return updated;
+          });
+        }
+      }
     } catch (err) {
       console.error("❌ 스트리밍 실패", err);
     }
