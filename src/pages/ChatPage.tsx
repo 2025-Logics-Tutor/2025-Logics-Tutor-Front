@@ -21,21 +21,25 @@ function ChatPage() {
   } = useOutletContext<ChatContextType>();
 
   useEffect(() => {
-    if (conversationId !== null) {
-      const token = localStorage.getItem("access_token");
-      fetch(`${import.meta.env.VITE_API_BASE_URL}/api/conversations/${conversationId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setMessages(data.messages);
-        })
-        .catch((err) => {
-          console.error("이전 메시지 로딩 실패:", err);
-        });
+    if (conversationId === null) {
+      setMessages([]); // ✅ 새 채팅일 때 메시지 비우기
+      return;
     }
+
+    const token = localStorage.getItem("access_token");
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/conversations/${conversationId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setMessages(data.messages);
+      })
+      .catch((err) => {
+        console.error("이전 메시지 로딩 실패:", err);
+        setMessages([]); // 실패해도 초기화
+      });
   }, [conversationId]);
 
   return (

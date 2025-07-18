@@ -101,7 +101,7 @@ function InputBar({ conversationId, setConversationId, messages, setMessages }: 
         onChange={(e) => setInput(e.target.value)}
       />
       <button className="send-button" onClick={handleSend}>
-        📨
+        ✉️
       </button>
     </div>
   );
