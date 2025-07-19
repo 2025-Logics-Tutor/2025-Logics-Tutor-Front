@@ -4,17 +4,14 @@ import { signupApi } from "../api/auth";
 import "./AuthPage.css";
 import Logo from "../components/Logo";
 
-
 function SignupPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [nickname, setNickname] = useState("");
-  const [level, setLevel] = useState<"ELEMENTARY" | "UNIV" | "GRAD">("UNIV");
 
   const handleSignup = async () => {
     try {
-      await signupApi(email, password, nickname, level);
+      await signupApi(email, password);
       alert("회원가입 성공!");
       navigate("/login");
     } catch {
@@ -41,24 +38,9 @@ function SignupPage() {
           onChange={(e) => setPassword(e.target.value)}
           className="auth-input"
         />
-        <input
-          type="text"
-          placeholder="닉네임"
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          className="auth-input"
-        />
-        <select
-          value={level}
-          onChange={(e) => setLevel(e.target.value as "ELEMENTARY" | "UNIV" | "GRAD")}
-          className="auth-input"
-        >
-          <option value="ELEMENTARY">초등학생</option>
-          <option value="UNIV">대학생</option>
-          <option value="GRAD">대학원생</option>
-        </select>
-
-        <button onClick={handleSignup} className="auth-button">회원가입</button>
+        <button onClick={handleSignup} className="auth-button">
+          회원가입
+        </button>
         <p className="auth-bottom-text">
           이미 계정이 있으신가요? <a href="/login">로그인</a>
         </p>

@@ -1,5 +1,4 @@
-// src/api/auth.ts
-
+// 로그인 API
 export async function loginApi(email: string, password: string) {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
       method: "POST",
@@ -14,20 +13,12 @@ export async function loginApi(email: string, password: string) {
     return res.json(); // { access_token, refresh_token }
   }
   
-// src/api/auth.ts
-
-// src/api/auth.ts
-
-export async function signupApi(
-    email: string,
-    password: string,
-    nickname: string,
-    level: "ELEMENTARY" | "UNIV" | "GRAD"
-  ) {
+  // 회원가입 API (닉네임, 레벨 제거됨)
+  export async function signupApi(email: string, password: string) {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, nickname, level }),
+      body: JSON.stringify({ email, password }),
     });
   
     if (!res.ok) {
@@ -37,9 +28,8 @@ export async function signupApi(
     return res.json(); // { message: "회원가입 성공" }
   }
   
-  // src/api/auth.ts
-
-export async function refreshAccessToken() {
+  // 액세스 토큰 갱신 API
+  export async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh_token");
   
     if (!refreshToken) {
