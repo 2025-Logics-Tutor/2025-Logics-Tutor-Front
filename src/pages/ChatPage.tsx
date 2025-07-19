@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ChatWindow from "../components/ChatWindow";
 import InputBar from "../components/InputBar";
-import type { ChatResponse } from "../types/ChatResponse";
 import "./ChatPage.css";
-
-interface ChatContextType {
-  conversationId: number | null;
-  setConversationId: (id: number | null) => void;
-  messages: ChatResponse[];
-  setMessages: React.Dispatch<React.SetStateAction<ChatResponse[]>>;
-}
+import { fetchWithAuth } from "../api/fetchWithAuth";
+import { useChatSession } from "../context/ChatSessionContext";
 
 function ChatPage() {
   const {
@@ -18,47 +12,45 @@ function ChatPage() {
     setConversationId,
     messages,
     setMessages,
-  } = useOutletContext<ChatContextType>();
+  } = useChatSession();
 
   const [input, setInput] = useState("");
-  const [quote, setQuote] = useState<string | null>(null); // ✅ quote 상태 추가
+  const [quote, setQuote] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (conversationId === null) {
+    const saved = localStorage.getItem("conversation_id");
+    if (saved && !conversationId) {
+      setConversationId(Number(saved));
+    }
+  }, [conversationId, setConversationId]);
+
+  useEffect(() => {
+    if (!conversationId) {
       setMessages([]);
       return;
     }
 
-    const token = localStorage.getItem("access_token");
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/conversations/${conversationId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setMessages(data.messages);
+    fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/api/conversations/${conversationId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
       })
+      .then((data) => setMessages(data.messages))
       .catch((err) => {
         console.error("이전 메시지 로딩 실패:", err);
-        setMessages([]);
+        localStorage.clear();
+        navigate("/login");
       });
-  }, [conversationId]);
+  }, [conversationId, setMessages, navigate]);
 
   return (
     <div className="chat-page">
       <main className="chat-main">
-        <ChatWindow
-          messages={messages}
-          onQuoteSelected={(selectedQuote) => {
-            setQuote(selectedQuote);
-          }}
-        />
+        <ChatWindow onQuoteSelected={(q) => setQuote(q)} />
         <InputBar
           conversationId={conversationId}
           setConversationId={setConversationId}
-          messages={messages}
-          setMessages={setMessages}
           input={input}
           setInput={setInput}
           quote={quote}

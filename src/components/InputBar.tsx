@@ -2,17 +2,13 @@ import { useState } from "react";
 import "./InputBar.css";
 import { useConversationContext } from "../context/ConversationContext";
 import { Send } from "lucide-react";
-
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
+import { useNavigate } from "react-router-dom";
+import { fetchWithAuth } from "../api/fetchWithAuth";
+import { useChatSession } from "../context/ChatSessionContext";
 
 interface Props {
   conversationId: number | null;
   setConversationId: React.Dispatch<React.SetStateAction<number | null>>;
-  messages: ChatMessage[];
-  setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
   quote: string | null;
@@ -22,8 +18,6 @@ interface Props {
 function InputBar({
   conversationId,
   setConversationId,
-  messages,
-  setMessages,
   input,
   setInput,
   quote,
@@ -31,84 +25,86 @@ function InputBar({
 }: Props) {
   const [level, setLevel] = useState<"ELEMENTARY" | "UNIV" | "GRAD">("UNIV");
   const { fetchConversations } = useConversationContext();
+  const navigate = useNavigate();
+  const { addMessage, updateLastAssistantMessage, setMessages } = useChatSession();
 
   const logicSymbols = ["¬", "∧", "∨", "→", "↔", "∀", "∃", "⊥"];
 
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    const userMsg: ChatMessage = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMsg]);
+    addMessage({ role: "user", content: input });
     setInput("");
     setQuote(null);
 
     const token = localStorage.getItem("access_token");
-    if (!token) return;
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
-    const encodedMsg = encodeURIComponent(input);
-    const encodedLevel = encodeURIComponent(level);
-    const encodedQuote = quote ? `&quote=${encodeURIComponent(quote)}` : "";
+    const msg = encodeURIComponent(input);
+    const lvl = encodeURIComponent(level);
+    const q = quote ? `&quote=${encodeURIComponent(quote)}` : "";
 
-    const url = conversationId
-      ? `${baseUrl}/api/conversations/${conversationId}/chat-stream?message=${encodedMsg}&level=${encodedLevel}${encodedQuote}`
-      : `${baseUrl}/api/conversations/chat-new?message=${encodedMsg}&level=${encodedLevel}${encodedQuote}`;
+    let convId = conversationId;
 
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    if (!convId) {
+      const createRes = await fetchWithAuth(
+        `${baseUrl}/api/conversations/chat-new?message=${msg}&level=${lvl}${q}`
+      );
 
-      if (!response.ok || !response.body) {
-        console.error("❌ 서버 응답 실패");
+      if (!createRes.ok) {
+        console.error("❌ 새 대화 생성 실패");
         return;
       }
 
-      if (!conversationId) {
-        const newId = response.headers.get("X-Conversation-Id");
-        if (newId) {
-          setConversationId(Number(newId));
-        }
+      const newId = createRes.headers.get("X-Conversation-Id");
+      if (!newId) {
+        console.error("❌ X-Conversation-Id 헤더 없음");
+        return;
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder("utf-8");
+      convId = Number(newId);
+      setConversationId(convId);
+      localStorage.setItem("conversation_id", newId);
 
-      let fullContent = "";
-      let isFirstChunk = true;
-      let assistantFirstMessageSent = false;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        fullContent += chunk;
-
-        if (isFirstChunk) {
-          setMessages((prev) => [...prev, { role: "assistant", content: fullContent }]);
-          isFirstChunk = false;
-
-          if (!assistantFirstMessageSent) {
-            assistantFirstMessageSent = true;
-            fetchConversations();
-          }
-        } else {
-          setMessages((prev) => {
-            const updated = [...prev];
-            updated[updated.length - 1] = {
-              ...updated[updated.length - 1],
-              content: fullContent,
-            };
-            return updated;
-          });
-        }
+      const historyRes = await fetchWithAuth(`${baseUrl}/api/conversations/${newId}`);
+      if (historyRes.ok) {
+        const data = await historyRes.json();
+        setMessages(data.messages);
       }
-    } catch (err) {
-      console.error("❌ 스트리밍 실패", err);
+    }
+
+    const streamRes = await fetchWithAuth(
+      `${baseUrl}/api/conversations/${convId}/chat-stream?message=${msg}&level=${lvl}${q}`
+    );
+
+    if (!streamRes.ok || !streamRes.body) {
+      console.error("❌ 스트리밍 실패", streamRes.status);
+      return;
+    }
+
+    const reader = streamRes.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+
+    let fullContent = "";
+    let isFirstChunk = true;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      fullContent += chunk;
+
+      updateLastAssistantMessage(fullContent);
+
+      if (isFirstChunk) {
+        fetchConversations();
+        isFirstChunk = false;
+      }
     }
   };
 
@@ -121,7 +117,6 @@ function InputBar({
         </div>
       )}
 
-      {/* ✅ 논리 기호 버튼 */}
       <div className="symbol-buttons">
         {logicSymbols.map((symbol) => (
           <button

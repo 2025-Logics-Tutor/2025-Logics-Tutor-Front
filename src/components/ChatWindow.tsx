@@ -1,17 +1,16 @@
-// src/components/ChatWindow.tsx
 import { useRef, useEffect } from "react";
-import type { ChatResponse } from "../types/ChatResponse";
+import { useChatSession } from "../context/ChatSessionContext";
 import ChatBubble from "./ChatBubble";
 import "./ChatWindow.css";
 
 interface Props {
-  messages: ChatResponse[];
   onQuoteSelected?: (quote: string) => void;
 }
 
-function ChatWindow({ messages, onQuoteSelected }: Props) {
+function ChatWindow({ onQuoteSelected }: Props) {
+  const { messages } = useChatSession();
   const containerRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null); // ✅ 맨 아래 위치 ref
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   const handleMouseUp = () => {
     const selection = window.getSelection();
@@ -21,11 +20,10 @@ function ChatWindow({ messages, onQuoteSelected }: Props) {
     }
   };
 
-  // ✅ messages가 바뀔 때마다 아래로 스크롤
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
+  console.log("🔥 messages 상태:", messages);
   return (
     <div className="chat-window" onMouseUp={handleMouseUp} ref={containerRef}>
       <div className="message-list">
@@ -34,13 +32,12 @@ function ChatWindow({ messages, onQuoteSelected }: Props) {
         ) : (
           messages.map((msg) => (
             <ChatBubble
-              key={msg.message_id || Math.random()}
+              key={msg.message_id}
               role={msg.role}
               content={msg.content}
             />
           ))
         )}
-        {/* ✅ 항상 아래에 위치할 div */}
         <div ref={bottomRef} />
       </div>
     </div>
