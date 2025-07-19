@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import ChatWindow from "../components/ChatWindow";
 import InputBar from "../components/InputBar";
@@ -20,9 +20,12 @@ function ChatPage() {
     setMessages,
   } = useOutletContext<ChatContextType>();
 
+  const [input, setInput] = useState("");
+  const [quote, setQuote] = useState<string | null>(null); // ✅ quote 상태 추가
+
   useEffect(() => {
     if (conversationId === null) {
-      setMessages([]); // ✅ 새 채팅일 때 메시지 비우기
+      setMessages([]);
       return;
     }
 
@@ -38,19 +41,28 @@ function ChatPage() {
       })
       .catch((err) => {
         console.error("이전 메시지 로딩 실패:", err);
-        setMessages([]); // 실패해도 초기화
+        setMessages([]);
       });
   }, [conversationId]);
 
   return (
     <div className="chat-page">
       <main className="chat-main">
-        <ChatWindow messages={messages} />
+        <ChatWindow
+          messages={messages}
+          onQuoteSelected={(selectedQuote) => {
+            setQuote(selectedQuote);
+          }}
+        />
         <InputBar
           conversationId={conversationId}
           setConversationId={setConversationId}
           messages={messages}
           setMessages={setMessages}
+          input={input}
+          setInput={setInput}
+          quote={quote}
+          setQuote={setQuote}
         />
       </main>
     </div>

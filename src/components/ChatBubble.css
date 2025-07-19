@@ -1,0 +1,135 @@
+.chat-bubble {
+    max-width: 80%;
+    width: fit-content;
+    padding: 0.3rem 0.7rem;      /* 상하 패딩 줄임 */
+    margin: 0.1rem 0;            /* 버블 간 거리 줄임 */
+    border-radius: 1rem;
+    white-space: pre-wrap;
+    line-height: 1.3;            /* 줄 간격 줄임 */
+    font-size: 0.93rem;
+  }
+  
+  .chat-bubble.user {
+    align-self: flex-end;
+    background-color: #d8eefe;
+    color: #000;
+  }
+  
+  .chat-bubble.assistant {
+    align-self: flex-start;
+    background-color: #f9f9f9;
+    color: #333;
+  }
+  
+  /* ✅ 문단 기본 여백 줄이기 */
+  .chat-bubble p {
+    margin: 0.2rem 0 !important;
+    line-height: 1.4;
+  }
+  
+  /* ✅ 리스트 내부 문단 여백도 최소화 */
+  .chat-bubble li p {
+    margin: 0.1rem 0 !important;
+  }
+  
+  /* ✅ 리스트 이후 요소 간격 최소화 */
+  .chat-bubble p:not(:first-child),
+  .chat-bubble h1:not(:first-child),
+  .chat-bubble h2:not(:first-child),
+  .chat-bubble h3:not(:first-child),
+  .chat-bubble pre:not(:first-child),
+  .chat-bubble blockquote:not(:first-child) {
+    margin-top: 0.2rem !important;
+  }
+  
+  /* ✅ 헤딩 최소화 */
+  .chat-bubble h1,
+  .chat-bubble h2,
+  .chat-bubble h3 {
+    margin: 0.1rem 0 !important;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  
+  /* ✅ 리스트 항목 간격 조절 */
+  .chat-bubble ul,
+  .chat-bubble ol {
+    list-style-position: inside;
+    padding-left: 1rem;
+    margin: 0.1rem 0 !important;
+  }
+  
+  .chat-bubble li {
+    display: list-item;
+    margin: 0.1rem 0;
+    line-height: 1.3;
+    text-indent: -0.6rem;
+    padding-left: 0.6rem;
+  }
+  
+  /* ✅ 인라인 코드 스타일 축소 */
+  .chat-bubble code {
+    background-color: #eaeaea;
+    padding: 1px 3px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.88rem;
+    white-space: break-spaces;
+  }
+  
+  /* ✅ 리스트 내부 code 여백 제거 */
+  .chat-bubble li > code {
+    margin: 0;
+    padding: 1px 3px;
+  }
+  
+  /* ✅ 코드 블럭 */
+  .chat-bubble pre {
+    background-color: #eaeaea;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 0.9rem;
+    margin: 0.2rem 0;
+    line-height: 1.25;
+  }
+  
+  /* ✅ 인용문 */
+  .chat-bubble blockquote {
+    border-left: 4px solid #ccc;
+    padding-left: 0.6rem;
+    color: #555;
+    margin: 0.2rem 0;
+    font-style: italic;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+  }
+  
+  /* ✅ 링크 */
+  .chat-bubble a {
+    color: #0077cc;
+    text-decoration: underline;
+  }
+  .chat-bubble em {
+    font-style: italic;
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+    color: inherit;
+  }  
+  .chat-bubble pre {
+    position: relative;
+  }
+  
+  .chat-bubble pre::after {
+    content: "📋";
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    opacity: 0.6;
+  }
+  

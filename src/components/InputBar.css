@@ -1,9 +1,61 @@
 .input-bar {
     display: flex;
+    flex-direction: column;
     padding: 1rem;
     border-top: 1px solid #ddd;
     background: #fff;
-    /* 기본적으로 하단에 고정됨 (chat-main이 flex column이기 때문) */
+  }
+  
+  .quote-preview {
+    width: 100%;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #444;
+    background: #f1f1f1;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    align-self: center;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .quote-clear-btn {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  
+  .input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  
+  .level-select-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .level-select-box label {
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+    color: #333;
+  }
+  
+  .level-dropdown {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    background-color: #f8f9fa;
   }
   
   .input-box {
@@ -16,7 +68,6 @@
   }
   
   .send-button {
-    margin-left: 0.5rem;
     padding: 0.75rem 1.2rem;
     font-size: 1.2rem;
     background-color: #005bbb;
@@ -24,5 +75,30 @@
     border: none;
     border-radius: 0.5rem;
     cursor: pointer;
+  }
+  .symbol-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+    justify-content: center;
+  }
+  
+  .symbol-btn {
+    font-size: 1.2rem;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f4f4f4;
+    cursor: pointer;
+    font-family: 'STIX Two Math', serif;
+    line-height: 1;
+    min-width: 32px;
+    text-align: center;
+    transition: background-color 0.2s ease;
+  }  
+
+  .symbol-btn:hover {
+    background-color: #e6e6e6;
   }
   
