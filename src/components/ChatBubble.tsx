@@ -1,4 +1,9 @@
-import { useEffect, useRef } from "react";
+// src/components/ChatBubble.tsx
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css"; // 꼭 필요함
 import "./ChatBubble.css";
 
 interface Props {
@@ -7,17 +12,18 @@ interface Props {
 }
 
 function ChatBubble({ role, content }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (window.MathJax && window.MathJax.typesetPromise) {
-      window.MathJax.typesetPromise([ref.current!]);
-    }
-  }, [content]);
-
   return (
-    <div className={`chat-bubble ${role}`} ref={ref}>
-      <div dangerouslySetInnerHTML={{ __html: content }} />
+    <div className={`chat-bubble ${role}`}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        components={{
+          p: ({ node, ...props }) => <p style={{ margin: "0.2rem 0" }} {...props} />,
+          li: ({ node, ...props }) => <li style={{ marginBottom: "0.1rem" }} {...props} />,
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 }
