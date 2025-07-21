@@ -9,9 +9,10 @@ import "./ChatBubble.css";
 interface Props {
   role: "user" | "assistant";
   content: string;
+  isDocumented?: boolean; // ✅ 추가
 }
 
-function ChatBubble({ role, content }: Props) {
+function ChatBubble({ role, content, isDocumented }: Props) {
   return (
     <div className={`chat-bubble ${role}`}>
       <ReactMarkdown
@@ -24,6 +25,11 @@ function ChatBubble({ role, content }: Props) {
       >
         {content}
       </ReactMarkdown>
+
+      {/* ✅ 버블 바깥 하단 표시 */}
+      {role === "assistant" && isDocumented && (
+        <div className="documented-note">이 응답은 문서를 기반으로 생성되었습니다</div>
+      )}
     </div>
   );
 }

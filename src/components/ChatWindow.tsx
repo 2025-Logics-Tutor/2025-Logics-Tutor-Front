@@ -35,6 +35,7 @@ function ChatWindow({ onQuoteSelected }: Props) {
               key={msg.message_id}
               role={msg.role}
               content={msg.content}
+              isDocumented={msg.isDocumented}
             />
           ))
         )}

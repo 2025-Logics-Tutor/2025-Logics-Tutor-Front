@@ -4,4 +4,5 @@ export interface ChatResponse {
     role: string;
     content: string;
     created_at: string;
+    isDocumented?: boolean;
   }  

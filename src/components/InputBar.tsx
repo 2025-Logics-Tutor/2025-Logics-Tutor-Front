@@ -49,15 +49,12 @@ function InputBar({
     let isNewChat = false;
 
     if (!convId) {
-      // 새 대화인 경우: SSE로 요청 보내되, conversationId는 헤더에서 받아야 함
       streamUrl = `${baseUrl}/api/conversations/chat-new?message=${msg}&level=${lvl}${q}`;
       isNewChat = true;
     } else {
-      // 기존 대화
       streamUrl = `${baseUrl}/api/conversations/${convId}/chat-stream?message=${msg}&level=${lvl}${q}`;
     }
 
-    // user 메시지는 기존 대화일 때만 프론트에서 추가 (새 대화는 서버에서 저장됨)
     if (!isNewChat) {
       addMessage({ role: "user", content: input });
     }
@@ -72,7 +69,12 @@ function InputBar({
       return;
     }
 
-    // 새 대화면 헤더에서 conversationId 받아 설정
+    const reader = streamRes.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+
+    let fullContent = "";
+    let isFirstChunk = true;
+
     if (isNewChat) {
       const newId = streamRes.headers.get("X-Conversation-Id");
       if (!newId) {
@@ -84,15 +86,13 @@ function InputBar({
       setConversationId(convId);
       localStorage.setItem("conversation_id", newId);
 
-      // 메시지 초기화 (빈배열로 시작)
-      setMessages([{ role: "user", content: input, message_id: -1, created_at: new Date() }]);
+      setMessages([
+        { role: "user", content: input, message_id: -1, created_at: new Date() },
+        { role: "assistant", content: "", message_id: -2, created_at: new Date() }, // isDocumented은 아래에서 후처리
+      ]);
+    } else {
+      addMessage({ role: "assistant", content: "" }); // 마찬가지로 isDocumented 나중에 붙임
     }
-
-    const reader = streamRes.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-
-    let fullContent = "";
-    let isFirstChunk = true;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -104,11 +104,25 @@ function InputBar({
       updateLastAssistantMessage(fullContent);
 
       if (isFirstChunk) {
-        // 약간 딜레이 주고 사이드바 갱신
         setTimeout(() => fetchConversations(), 300);
         isFirstChunk = false;
       }
     }
+
+    // ✅ 스트리밍 종료 후 헤더 읽기
+    const isDocumentedHeader = streamRes.headers.get("X-Is-Documented");
+    const isDocumented = isDocumentedHeader === "true";
+    console.log("📎 문서 기반 여부:", streamRes.headers.get("X-Is-Documented"));
+
+    // ✅ 마지막 assistant 메시지에 isDocumented 추가
+    setMessages((prev) => {
+      const updated = [...prev];
+      const lastIdx = updated.length - 1;
+      if (updated[lastIdx]?.role === "assistant") {
+        updated[lastIdx] = { ...updated[lastIdx], isDocumented };
+      }
+      return updated;
+    });
   };
 
   return (

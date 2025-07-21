@@ -143,4 +143,9 @@
     cursor: pointer;
     opacity: 0.6;
   }
+  .documented-note {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 4px;
+  }
   
