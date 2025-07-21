@@ -33,10 +33,6 @@ function InputBar({
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    addMessage({ role: "user", content: input });
-    setInput("");
-    setQuote(null);
-
     const token = localStorage.getItem("access_token");
     if (!token) {
       navigate("/login");
@@ -49,20 +45,38 @@ function InputBar({
     const q = quote ? `&quote=${encodeURIComponent(quote)}` : "";
 
     let convId = conversationId;
+    let streamUrl = "";
+    let isNewChat = false;
 
     if (!convId) {
-      const createRes = await fetchWithAuth(
-        `${baseUrl}/api/conversations/chat-new?message=${msg}&level=${lvl}${q}`
-      );
+      // 새 대화인 경우: SSE로 요청 보내되, conversationId는 헤더에서 받아야 함
+      streamUrl = `${baseUrl}/api/conversations/chat-new?message=${msg}&level=${lvl}${q}`;
+      isNewChat = true;
+    } else {
+      // 기존 대화
+      streamUrl = `${baseUrl}/api/conversations/${convId}/chat-stream?message=${msg}&level=${lvl}${q}`;
+    }
 
-      if (!createRes.ok) {
-        console.error("❌ 새 대화 생성 실패");
-        return;
-      }
+    // user 메시지는 기존 대화일 때만 프론트에서 추가 (새 대화는 서버에서 저장됨)
+    if (!isNewChat) {
+      addMessage({ role: "user", content: input });
+    }
 
-      const newId = createRes.headers.get("X-Conversation-Id");
+    setInput("");
+    setQuote(null);
+
+    const streamRes = await fetchWithAuth(streamUrl);
+
+    if (!streamRes.ok || !streamRes.body) {
+      console.error("❌ 스트리밍 실패", streamRes.status);
+      return;
+    }
+
+    // 새 대화면 헤더에서 conversationId 받아 설정
+    if (isNewChat) {
+      const newId = streamRes.headers.get("X-Conversation-Id");
       if (!newId) {
-        console.error("❌ X-Conversation-Id 헤더 없음");
+        console.error("❌ 새 대화 생성: 헤더에 ID 없음");
         return;
       }
 
@@ -70,20 +84,8 @@ function InputBar({
       setConversationId(convId);
       localStorage.setItem("conversation_id", newId);
 
-      const historyRes = await fetchWithAuth(`${baseUrl}/api/conversations/${newId}`);
-      if (historyRes.ok) {
-        const data = await historyRes.json();
-        setMessages(data.messages);
-      }
-    }
-
-    const streamRes = await fetchWithAuth(
-      `${baseUrl}/api/conversations/${convId}/chat-stream?message=${msg}&level=${lvl}${q}`
-    );
-
-    if (!streamRes.ok || !streamRes.body) {
-      console.error("❌ 스트리밍 실패", streamRes.status);
-      return;
+      // 메시지 초기화 (빈배열로 시작)
+      setMessages([{ role: "user", content: input, message_id: -1, created_at: new Date() }]);
     }
 
     const reader = streamRes.body.getReader();
@@ -102,7 +104,8 @@ function InputBar({
       updateLastAssistantMessage(fullContent);
 
       if (isFirstChunk) {
-        fetchConversations();
+        // 약간 딜레이 주고 사이드바 갱신
+        setTimeout(() => fetchConversations(), 300);
         isFirstChunk = false;
       }
     }
