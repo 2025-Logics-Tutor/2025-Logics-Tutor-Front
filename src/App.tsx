@@ -9,6 +9,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { ConversationProvider } from "./context/ConversationContext";
 import { ChatSessionProvider } from "./context/ChatSessionContext";
 import { refreshAccessToken } from "./api/auth";
+import ChatBubbleTestPage from "./pages/ChatBubbleTestPage";
 
 function App() {
   useEffect(() => {
@@ -37,6 +38,7 @@ function App() {
               <Route element={<Layout />}>
                 <Route path="/" element={<ChatPage />} />
                 <Route path="/conversations/:conversationId" element={<ChatPage />} />
+                <Route path="/test-bubble" element={<ChatBubbleTestPage />} />
               </Route>
             </Route>
             <Route path="*" element={<NotFound />} />

@@ -8,18 +8,20 @@
     <link href="https://fonts.googleapis.com/css2?family=STIX+Two+Math&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React + TS</title>
-
-    <!-- ✅ MathJax 설정 -->
     <script>
       window.MathJax = {
         tex: {
           inlineMath: [["$", "$"], ["\\(", "\\)"]],
-          displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+          displayMath: [["\\[", "\\]"], ["$$", "$$"]],
+          processEscapes: true,
+          packages: ["base", "ams"]
         },
-        svg: { fontCache: "global" }
+        svg: {
+          fontCache: "global"
+        }
       };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>    
   </head>
   <body>
     <div id="root"></div>

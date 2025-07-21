@@ -36,7 +36,16 @@ function ChatPage() {
         if (!res.ok) throw new Error("Unauthorized");
         return res.json();
       })
-      .then((data) => setMessages(data.messages))
+      .then((data) => {
+        const formattedMessages = data.messages.map((msg: any) => ({
+          message_id: msg.message_id,
+          role: msg.role,
+          content: msg.content,
+          created_at: msg.created_at,
+          isDocumented: msg.is_documented, // ✅ 변환 지점
+        }));
+        setMessages(formattedMessages);
+      })
       .catch((err) => {
         console.error("이전 메시지 로딩 실패:", err);
         localStorage.clear();
