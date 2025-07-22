@@ -15,7 +15,7 @@ function LoginPage() {
       const data = await loginApi(email, password);
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("refresh_token", data.refresh_token);
-      navigate("/");
+      navigate("/chat");
     } catch {
       alert("로그인 실패");
     }

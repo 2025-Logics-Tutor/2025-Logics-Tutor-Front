@@ -22,7 +22,7 @@ function App() {
           window.location.href = "/login";
         });
       }
-    }, 13 * 60 * 1000);
+    }, 10 * 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -36,7 +36,7 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
-                <Route path="/" element={<ChatPage />} />
+                <Route path="/chat" element={<ChatPage />} />
                 <Route path="/conversations/:conversationId" element={<ChatPage />} />
                 <Route path="/test-bubble" element={<ChatBubbleTestPage />} />
               </Route>

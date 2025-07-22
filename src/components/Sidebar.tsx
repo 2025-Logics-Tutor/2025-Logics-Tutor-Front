@@ -19,7 +19,7 @@ function Sidebar() {
     localStorage.removeItem("conversation_id");
     setConversationId(null);
     setMessages([]);
-    navigate("/");
+    navigate("/chat");
   };
 
   const handleDelete = async (id: number) => {
